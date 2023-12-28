@@ -1,0 +1,172 @@
+
+( devices )
+|00 @System [ &vector $2 &pad $6 &r $2 &g $2 &b $2 ]
+|20 @Screen [ &vector $2 &width $2 &height $2 &pad $2 &x $2 &y $2 &addr $2 &pixel $1 &sprite ]
+|80 @Controller [ &vector $2 &button $1 &key $1 ]
+
+( main program )
+|0100
+
+( set screen size to 640x480 divided by two )
+#0280 #01 SFT2 .Screen/width DEO2
+#01e0 #01 SFT2 .Screen/height DEO2
+
+;on-controller .Controller/vector DEO2
+
+( set system colors )
+#2ce9 .System/r DEO2
+#01c0 .System/g DEO2
+#2ce5 .System/b DEO2
+
+( 1bpp sprite draw )
+#0010 .Screen/x DEO2
+#0010 .Screen/y DEO2
+;sprite-1bpp .Screen/addr DEO2
+#75 .Screen/sprite DEO
+
+( 1bpp sprite draw )
+#0013 .Screen/x DEO2
+#0013 .Screen/y DEO2
+;sprite-1bpp .Screen/addr DEO2
+#7a .Screen/sprite DEO
+
+( 1bpp sprite draw )
+#0016 .Screen/x DEO2
+#0016 .Screen/y DEO2
+;sprite-1bpp .Screen/addr DEO2
+#75 .Screen/sprite DEO
+
+( 1bpp sprite draw )
+#0019 .Screen/x DEO2
+#0019 .Screen/y DEO2
+;sprite-1bpp .Screen/addr DEO2
+#7a .Screen/sprite DEO
+
+( 1bpp sprite draw )
+#001c .Screen/x DEO2
+#001c .Screen/y DEO2
+;sprite-1bpp .Screen/addr DEO2
+#75 .Screen/sprite DEO
+
+#0020 .Screen/x DEO2
+#0030 .Screen/y DEO2
+;sprite-2bpp .Screen/addr DEO2
+#85 .Screen/sprite DEO
+
+#0028 .Screen/x DEO2
+#0040 .Screen/y DEO2
+;spaceship-2bpp .Screen/addr DEO2
+#11 .Screen/sprite DEO
+
+( 2bpp alien1 draw )
+#0090 .Screen/x DEO2
+#0060 .Screen/y DEO2
+;alien1-2bpp .Screen/addr DEO2
+#7a .Screen/sprite DEO
+
+( 2bpp alien2 draw )
+#00a0 .Screen/x DEO2
+#0050 .Screen/y DEO2
+;alien2-2bpp .Screen/addr DEO2
+#7a .Screen/sprite DEO
+
+( 2bpp alien2 draw )
+#00b0 .Screen/x DEO2
+#0040 .Screen/y DEO2
+;alien3-2bpp .Screen/addr DEO2
+#7a .Screen/sprite DEO
+
+( 2bpp alien2 draw )
+#00c0 .Screen/x DEO2
+#0030 .Screen/y DEO2
+;alien4-2bpp .Screen/addr DEO2
+#7a .Screen/sprite DEO
+
+
+#0140 #0000
+@loop
+  DUP2 .Screen/x DEO2
+  #00ef .Screen/y DEO2
+  #41 .Screen/pixel DEO
+  INC2
+  GTH2k ,loop JCN
+  
+#0140 #0000
+@loop2
+  #00f0 .Screen/x DEO2
+  DUP2 .Screen/y DEO2
+  #41 .Screen/pixel DEO
+  INC2
+  GTH2k ,loop2 JCN
+
+
+
+
+
+( #01 .System/halt DEO )
+
+BRK
+
+@on-controller ( -> )
+      .Controller/button DEI DUP ( read and duplicate button byte )
+      
+      &outline
+        #7a .Screen/sprite DEO ( draw outline )
+        ,&check-arrows JMP ( continue to check-arrows )
+
+      &check-arrows
+        ( use button byte from the stack )
+        DUP #10 AND ( isolate bit 4, corresponding to Up )
+        ,&up JCN ( jump if not 0 )
+        DUP #20 AND ( isolate bit 5, corresponding to Down )
+        ,&down JCN ( jump if not 0 )
+        DUP #40 AND ( isolate bit 6, corresponding to Left )
+        ,&left JCN ( jump if not 0 )
+        DUP #80 AND ( isolate bit 7, corresponding to Right )
+        ,&right JCN ( jump if not 0 )
+
+        POP BRK
+
+      &up
+       .Screen/y DEI2 #0030  SUB2 .Screen/y DEO2 ( decrement y )
+       POP
+      BRK
+      &down
+       .Screen/y DEI2 #0030  ADD2 .Screen/y DEO2 ( increment y )
+       POP
+      BRK
+      &left
+       .Screen/x DEI2 #0030 SUB2 .Screen/x DEO2 ( decrement x )
+       POP
+      BRK
+      &right
+       .Screen/x DEI2 #0030 ADD2 .Screen/x DEO2 ( increment x )
+       POP
+      BRK
+BRK
+
+
+
+
+
+@sprite-1bpp
+ff ( 11111111 )
+81 ( 10000001 )
+81 ( 10000001 )
+81 ( 10000001 )
+81 ( 10000001 )
+81 ( 10000001 )
+81 ( 10000001 )
+ff ( 11111111 )
+
+@sprite-2bpp 017f 7b73 6343 7fff     007c 7c7c 7c7c 0000
+
+@spaceship-2bpp 2133 3321 1212 2133 
+
+@alien1-2bpp  aaaa ffff dddd 2222
+@alien2-2bpp  aaaa ffff dddd 2222
+@alien3-2bpp  aaaa ffff dddd 2222
+@alien4-2bpp  aaaa ffff dddd 2222
+
+
+
