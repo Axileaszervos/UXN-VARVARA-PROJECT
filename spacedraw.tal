@@ -108,7 +108,7 @@
 BRK
 
 @on-controller ( -> )
-      .Controller/button DEI DUP ( read and duplicate button byte )
+      .Controller/button DEI ( read button byte )
       
       &outline
         #7a .Screen/sprite DEO ( draw outline )
